@@ -9,7 +9,7 @@ openai.api_key = os.environ['OPENAI_API_KEY']
 
 DELIMITER = "####"
 
-def get_completion(system_message, prompt, assistant_message='None', model="gpt-3.5-turbo"):
+def get_completion(system_message, prompt, model="gpt-3.5-turbo", assistant_message='None'):
     assert openai.api_key, 'Please provide an API key in the OPENAI_API_KEY environment variable'
     ret = openai.Moderation.create(
         prompt
@@ -36,7 +36,7 @@ def get_completion(system_message, prompt, assistant_message='None', model="gpt-
 
 def main(argv):
     try:
-        opts, args = getopt(argv[1:], "hvp:s:a:", ["help", "verbose=", "prompt=","system-message=", "assistant-message="])
+        opts, args = getopt(argv[1:], "hvp:s:a:m:", ["help", "verbose=", "prompt=","system-message=", "assistant-message=", "model="])
     except GetoptError as ex:
         error("get opt error: %s" % (str(ex)))
         usage()
@@ -46,6 +46,7 @@ def main(argv):
     arg_dict['prompt']=""
     arg_dict['assistant']=""
     arg_dict['verbose']=None
+    arg_dict['model']="gpt-3.5-turbo"
     for o, a in opts:
         if o in ("-h", "--help"):
             usage()
@@ -57,6 +58,8 @@ def main(argv):
             arg_dict["system"] = str(a)
         elif o in ("-a", "--assistant-message"):
             arg_dict["assistant"] = str(a)
+        elif o in ("-m", "--model"):
+            arg_dict["model"] = str(a)
         else:
             assert False, "unhandled option"
 
@@ -66,7 +69,7 @@ def main(argv):
 
         system_message = f"""message will be delimited with {DELIMITER} \
 characters.{arg_dict['system']}"""
-        response = get_completion(system_message, arg_dict['prompt'])
+        response = get_completion(system_message, arg_dict['prompt'], arg_dict['model'])
         print(response)
     except KeyError:
         pass
@@ -83,6 +86,7 @@ def usage():
            \t-p User prompt\n \
            \t-s System message\n \
            \t-a Assistant message\n \
+           \t-m GPT model (defaults to gpt-3.5-turbo)\n \
            \t-v Verbose output\n')
     sys.exit(1)
 
