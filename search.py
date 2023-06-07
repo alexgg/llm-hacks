@@ -57,16 +57,12 @@ def main(argv):
             print(f"""Arguments:\t{arg_dict}""")
 
         data_frame = pd.read_csv(arg_dict['embeddings-file'], index_col=0, sep='|')
-        results = search(data_frame, arg_dict['query'])
-        highest_similarity = results.similarities.max()
-        if highest_similarity >= 0.85:
-            print(data_frame.loc[data_frame.similarities == highest_similarity, 'body'])
-        else:
-            # TODO: Should call out to openai.Completion.create for chatGPT API
-            print("Sorry, I don't know the answer")
+        results = search(data_frame, arg_dict['query'], n_rows=3)
+        print(results['body'].str.cat(sep=' '))
 
     except KeyError:
-        pass
+        raise
+        #pass
 
 
 def error(message):
